@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.sql.Blob;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,19 +20,11 @@ import java.sql.Blob;
 public class ArchivoData implements Serializable {
 
     @Id
-    @Column(name = "id_modal")
-    private String id_modal;
-    @Column(name = "nombre_completo")
-    private String nombre_completo;
-    @Column(name = "edad")
-    private int edad;
-    @Column(name = "comentario")
-    private String comentario;
-    @Lob
-    @Column(name = "foto", length = 1000)
-    private byte[] foto;
-
+    private UUID id; // Cambiado a String para usar UUID
+    private String name;
     private String type;
-    private String filepath;
+
+    @Lob
+    private byte[] data;
 
 }

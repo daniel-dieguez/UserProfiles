@@ -1,72 +1,68 @@
 package com.java.profiles.dao.service;
 
-
-import com.java.profiles.dao.IArchivoDataDao;
+import com.java.profiles.dao.IArchivoRepositoryDao;
 import com.java.profiles.modals.ArchivoData;
+import com.java.profiles.modals.response.ResponseFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
-public class ArchivoDataService implements IArchivoDataServiImpl{
+public class ArchivoDataService implements IArchivoDataServiceImpl{
 
     @Autowired
-    private IArchivoDataDao iArchivoDataDao;
-
-    private final String FOLDER_PATH="D:\\4)Proyectos\\BackEnd\\Java\\API REST\\8. Perfil de Usuarios\\imagenes";
+    private IArchivoRepositoryDao iArchivoRepositoryDao;
 
 
+
+    //Enviar imagenes
     @Override
-    public List<ArchivoData> findAll() {
-        return null;
-    }
-
-    @Override
-    public ArchivoData findById(String id_usuario) {
-        return null;
-    }
-
-    @Override
-    public ArchivoData save(ArchivoData archivoData) {
-        return null;
-    }
-
-    @Override
-    public void delete(ArchivoData archivoData) {
-
-    }
-
-
-
-    public String uploadImage(MultipartFile file) throws IOException {
-
-        String filepath=FOLDER_PATH+file.getOriginalFilename();
-
-        ArchivoData archivoData = IArchivoDataDao.save(ArchivoData.builder()
-                .nombre_completo(file.getOriginalFilename())
+    public ArchivoData store(MultipartFile file) throws IOException {
+        String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+        ArchivoData archivoData = ArchivoData.builder()
+                .name(fileName)
                 .type(file.getContentType())
-                .filepath(filepath).build());
+                .build();
+        return iArchivoRepositoryDao.save(archivoData);
+    }
 
-        file.transferTo(new File(filepath));
-
-        if (archivoData != null) {
-            return "file uploaded successfully : " + filepath;
+    //descargar
+    @Override
+    public Optional<ArchivoData> getFile(UUID id) throws FileNotFoundException {
+        Optional<ArchivoData> file = iArchivoRepositoryDao.findById(id);
+        if(file.isPresent()){
+            return file;
         }
-        return null;
+        throw new FileNotFoundException();
+    }
+
+    //Muestra los datos
+    @Override
+    public List<ResponseFile> findAll() {
+        List<ResponseFile> file = iArchivoRepositoryDao.findAll().stream().map(dbFile ->{
+           String fileGuardar = ServletUriComponentsBuilder.fromCurrentContextPath()
+                   .path("archivo/files/")
+                   .path(dbFile.getId().toString())
+                   .toUriString();
+
+           return ResponseFile.builder()
+                   .name(dbFile.getName())
+                   .url(fileGuardar)
+                   .type(dbFile.getType())
+                   .size(dbFile.getData().length).build();
+        }).collect(Collectors.toList());
+        return file;
     }
 
 
-
-     public byte[] downloadImageFromFileSystem(String fileName) throws IOException {
-        Optional<ArchivoData> fileData = IArchivoDataDao.findByNombre_completo(fileName);
-        String filePath = fileData.get().getFilepath();
-        byte[] images = Files.readAllBytes(new File(filePath).toPath());
-        return images;
-    }
 }
