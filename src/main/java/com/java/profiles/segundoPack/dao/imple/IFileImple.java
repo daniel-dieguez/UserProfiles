@@ -10,6 +10,7 @@ public interface IFileImple {
 
     public List<FileEntity> findAll();
     public FileEntity findById(String id);
+    public FileEntity save(FileEntity file);
     public void detele (FileEntity fileEntity);
 
 }

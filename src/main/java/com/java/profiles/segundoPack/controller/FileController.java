@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -63,6 +65,7 @@ public class FileController {
         Map<String, Object> response = new HashMap<>();
         try {
             FileEntity fileEntity = new FileEntity();
+
             fileService.store(file);
             logger.info("Se acaba de crear un nuevo archivo");
             response.put("mensaje", "Nuevo archivo creado con éxito");
@@ -99,6 +102,57 @@ public class FileController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
+
+    @DeleteMapping("/deliteImages/{id}")
+    public ResponseEntity<?> deleteFile(@PathVariable String id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            FileEntity fileEntity = fileService.findById(id);
+            this.fileService.detele(fileEntity);
+            response.put("mensaje","La imagen del perfil con el id".concat(id).concat("fue eliminado "));
+            response.put("listado", id);
+            logger.info("Fue eliminada con exito");
+            return new ResponseEntity<Map<String,Object>>(response, HttpStatus.OK);
+
+        }catch (CannotCreateTransactionException e){
+            response = this.getTransactionExepcion(response, e);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        }catch(DataAccessException e){
+            response = this.getDataAccessException(response, e);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
+
+
+    @PutMapping(value = "/UpFile/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> updateFile( @RequestParam("file") MultipartFile file, @PathVariable String id){
+
+        Map<String, Object> response = new HashMap<>();
+        try {
+            FileEntity fileEntity = fileService.findById(id);
+            fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
+            fileEntity.setType(file.getContentType());
+            fileEntity.setData(file.getBytes());
+
+            fileService.storeFile(fileEntity);
+
+            response.put("mensaje", "El archivo ha sido actualizado con éxito!");
+            response.put("file", fileEntity);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+
+        } catch (CannotCreateTransactionException e) {
+            response = this.getTransactionExepcion(response, e);
+            return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (DataAccessException e) {
+            response = this.getDataAccessException(response, e);
+            return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        } catch (IOException e) {
+            response.put("mensaje", "Error al subir el archivo");
+            response.put("error", e.getMessage().concat(": ").concat(e.getCause() != null ? e.getCause().getMessage() : ""));
+            return new ResponseEntity<>(response, HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
+
 
 
     private Map<String, Object> getTransactionExepcion(Map<String,Object> response, CannotCreateTransactionException e){

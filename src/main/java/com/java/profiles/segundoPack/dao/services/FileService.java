@@ -30,9 +30,13 @@ public class FileService implements IFileImple {
         return this.iFileRepository.findById(id).orElse(null);
     }
 
+    @Override
+    public FileEntity save(FileEntity file) {
+        return this.iFileRepository.save(file);
+    }
 
 
-   // servicio de guardado
+    // servicio de guardado
 
     public FileEntity store(MultipartFile file) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
@@ -40,6 +44,10 @@ public class FileService implements IFileImple {
         fileEntity.setId(UUID.randomUUID().toString());
         return this.iFileRepository.save(fileEntity);
 
+    }
+
+    public FileEntity storeFile(FileEntity fileEntity) {
+        return this.iFileRepository.save(fileEntity);
     }
 
     @Override
