@@ -138,7 +138,7 @@ public class FileController {
 
             response.put("mensaje", "El archivo ha sido actualizado con éxito!");
             response.put("file", fileEntity);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK)
 
         } catch (CannotCreateTransactionException e) {
             response = this.getTransactionExepcion(response, e);
