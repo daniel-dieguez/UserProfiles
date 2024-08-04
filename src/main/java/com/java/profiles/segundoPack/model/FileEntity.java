@@ -23,8 +23,14 @@ public class FileEntity implements Serializable {
     private String type;
 
     @Lob
-    @Column(name = "data", length = 1000)
+    @Column(name = "data", length = 1000000)
     private byte[] data;
+
+    @Column(name = "nombre_completo")
+    private String nombre_Completo;
+
+    @Column(name = "comentario_user")
+    private String comentario_user;
 
 
     public FileEntity(String name, String type, byte[] data) {

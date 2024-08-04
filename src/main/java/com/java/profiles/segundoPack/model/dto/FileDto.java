@@ -1,6 +1,8 @@
 package com.java.profiles.segundoPack.model.dto;
 
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +25,12 @@ public class FileDto  implements Serializable {
 
     @NotEmpty(message = "El File no debe de estar vacio")
     private byte[] data;
+
+    @NotEmpty(message = "Debes de llenar el dato nombre")
+    private String nombre_Completo;
+
+    @NotEmpty (message = "Debes de agregar un comentario ")
+    private String comentario_user;
 
     public void setData(MultipartFile file) throws IOException {
         this.data = file.getBytes();

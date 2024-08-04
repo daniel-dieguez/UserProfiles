@@ -61,12 +61,14 @@ public class FileController {
     }
 
     @PostMapping("/Upfile")
-    public ResponseEntity<?> createFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> createFile(@RequestParam("file") MultipartFile file,
+                                        @RequestParam("nombre_completo") String nombreCompleto,
+                                        @RequestParam("comentario_user") String comentarioUser) {
         Map<String, Object> response = new HashMap<>();
         try {
             FileEntity fileEntity = new FileEntity();
 
-            fileService.store(file);
+            fileService.store(file, nombreCompleto, comentarioUser);
             logger.info("Se acaba de crear un nuevo archivo");
             response.put("mensaje", "Nuevo archivo creado con éxito");
             response.put("listado", fileEntity);
@@ -125,7 +127,10 @@ public class FileController {
 
 
     @PutMapping(value = "/UpFile/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> updateFile( @RequestParam("file") MultipartFile file, @PathVariable String id){
+    public ResponseEntity<?> updateFile( @RequestParam("file") MultipartFile file,
+                                         @RequestParam("nombre_completo") String nombreCompleto,
+                                         @RequestParam("comentario_user") String comentarioUser,
+                                         @PathVariable String id){
 
         Map<String, Object> response = new HashMap<>();
         try {
@@ -133,12 +138,15 @@ public class FileController {
             fileEntity.setName(StringUtils.cleanPath(file.getOriginalFilename()));
             fileEntity.setType(file.getContentType());
             fileEntity.setData(file.getBytes());
+            fileEntity.setNombre_Completo(nombreCompleto);
+            fileEntity.setComentario_user(comentarioUser);
+
 
             fileService.storeFile(fileEntity);
 
             response.put("mensaje", "El archivo ha sido actualizado con éxito!");
             response.put("file", fileEntity);
-            return new ResponseEntity<>(response, HttpStatus.OK)
+            return new ResponseEntity<>(response, HttpStatus.OK);
 
         } catch (CannotCreateTransactionException e) {
             response = this.getTransactionExepcion(response, e);

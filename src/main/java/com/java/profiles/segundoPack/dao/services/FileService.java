@@ -38,9 +38,11 @@ public class FileService implements IFileImple {
 
     // servicio de guardado
 
-    public FileEntity store(MultipartFile file) throws IOException {
+    public FileEntity store(MultipartFile file, String nombreCompleto, String comentarioUusuario) throws IOException {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());
         FileEntity fileEntity = new FileEntity(fileName, file.getContentType(), file.getBytes());
+        fileEntity.setNombre_Completo(nombreCompleto);
+        fileEntity.setComentario_user(comentarioUusuario);
         fileEntity.setId(UUID.randomUUID().toString());
         return this.iFileRepository.save(fileEntity);
 
